@@ -23,4 +23,9 @@ public class AuthController {
         String response= authService.login(request);
         return ResponseEntity.ok(response);
     }
+    @GetMapping("/verify-email")
+    public String verifyEmail(@RequestParam String token){
+        String response=authService.verifyEmail(token);
+        return response;
+    }
 }

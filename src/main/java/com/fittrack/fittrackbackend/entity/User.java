@@ -37,10 +37,16 @@ public class User implements UserDetails {
 
     private String role;
 
+    @Column(nullable = false)
     @Builder.Default
     private Boolean emailVerified=false;
 
     private LocalDateTime emailVerifiedAt;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private AuthProvider authProvider = AuthProvider.LOCAL;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -71,7 +77,5 @@ public class User implements UserDetails {
     public boolean isEnabled(){
         return true;
     }
-
-
 
 }
