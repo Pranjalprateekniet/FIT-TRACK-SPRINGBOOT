@@ -1,5 +1,4 @@
 package com.fittrack.fittrackbackend.service;
-
 import com.fittrack.fittrackbackend.dto.LoginRequest;
 import com.fittrack.fittrackbackend.dto.RegisterRequest;
 import com.fittrack.fittrackbackend.entity.AuthProvider;
@@ -10,9 +9,7 @@ import com.fittrack.fittrackbackend.repository.VerificationTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -22,7 +19,7 @@ public class AuthService {
     private final JwtService jwtService;
     private final BCryptPasswordEncoder passwordEncoder;
     private final VerificationTokenRepository verificationTokenRepository;
-
+    private final EmailService emailService;
 
 
     public String register(RegisterRequest request) {
@@ -47,8 +44,9 @@ public class AuthService {
                 .expiryDate(LocalDateTime.now().plusHours(24))
                 .build();
         verificationTokenRepository.save(verificationToken);
+        emailService.sendVerificationEmail(saveduser.getEmail(),token);
 
-        return "User registered successfully";
+        return "User registered successfully. Please check your mail";
     }
     public String login(LoginRequest request){
             User user=userRepository.findByEmail(request.getEmail()).orElseThrow(()->new RuntimeException("User not found"));
