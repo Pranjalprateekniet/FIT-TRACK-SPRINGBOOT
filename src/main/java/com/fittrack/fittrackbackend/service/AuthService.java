@@ -8,7 +8,6 @@ import com.fittrack.fittrackbackend.entity.VerificationToken;
 import com.fittrack.fittrackbackend.repository.UserRepository;
 import com.fittrack.fittrackbackend.repository.VerificationTokenRepository;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.text.translate.UnicodeUnescaper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +27,7 @@ public class AuthService {
 
     public String register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            return "Email already exists";
+            throw new RuntimeException("Email already exists");
         }
         User user = User.builder()
         .name(request.getName())
@@ -53,18 +52,22 @@ public class AuthService {
     }
     public String login(LoginRequest request){
             User user=userRepository.findByEmail(request.getEmail()).orElseThrow(()->new RuntimeException("User not found"));
-
-            boolean isPasswordCorrect=passwordEncoder.matches(request.getPassword(), user.getPassword());
-            if(!isPasswordCorrect){
-                throw  new RuntimeException("Incorrect password");
-            }
-            String token= jwtService.generateToken(user.getEmail());
-            return token;
+        if (!user.getEmailVerified()) {
+            throw new RuntimeException("Please verify your email before logging in");
+        }
+        boolean isPasswordCorrect =
+                passwordEncoder.matches(request.getPassword(), user.getPassword());
+        if (!isPasswordCorrect) {
+            throw new RuntimeException("Incorrect password");
+        }
+        String token= jwtService.generateToken(user.getEmail());
+        return token;
     }
 
     public String verifyEmail(String token){
             VerificationToken verificationToken=verificationTokenRepository.findByToken(token).orElseThrow(()->new RuntimeException("Invalid verification token"));
             if(LocalDateTime.now().isAfter(verificationToken.getExpiryDate())){
+                verificationTokenRepository.delete(verificationToken);
                 throw new RuntimeException("Verification token expired");
             }
             User user=verificationToken.getUser();
