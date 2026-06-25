@@ -15,7 +15,7 @@ public class CreateFoodLogRequest {
     private Long foodId;
 
     @NotNull
-    @Positive
+    @Positive(message = "Grams consumed must be greater than zero")
     private Double gramsConsumed;
 
     @NotNull

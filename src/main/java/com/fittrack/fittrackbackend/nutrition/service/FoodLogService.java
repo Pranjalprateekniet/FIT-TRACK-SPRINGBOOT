@@ -95,9 +95,13 @@ public class FoodLogService {
             FoodNutrition food =
                     foodLog.getFoodNutrition();
 
+            double servingSize =
+                    food.getServingSizeG() == null
+                            ? 100.0
+                            : food.getServingSizeG();
+
             double multiplier =
-                    foodLog.getGramsConsumed()
-                            / food.getServingSizeG();
+                    foodLog.getGramsConsumed() / servingSize;
 
             totalCalories +=
                     safe(food.getCalories()) * multiplier;

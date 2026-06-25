@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name="food_logs")
@@ -27,10 +28,14 @@ public class FoodLog {
     @JoinColumn(name = "food_id")
     private FoodNutrition foodNutrition;
 
+    @Column(nullable = false)
     private Double gramsConsumed;
     @Enumerated(EnumType.STRING)
     private MealType mealType;
 
+    @Column(nullable = false)
     private LocalDate logDate;
+
+    private LocalDateTime createdAt;
 
 }

@@ -13,4 +13,9 @@ public class FoodSearchResponse {
     private Double protein;
     private Double carbs;
     private Double fat;
+    private Double fiber;
+    private Double cholesterol;
+    private Double freeSugar;
+    private Double servingSizeG;
+    private String dataType;
 }

@@ -28,7 +28,9 @@ public class USDAClient {
                         .host("api.nal.usda.gov")
                         .path("/fdc/v1/foods/search")
                         .queryParam("query", query)
-                        .queryParam("pageSize", 10) // IMPORTANT
+                        .queryParam("pageSize", 10)
+                        .queryParam("dataType", "Foundation")
+                        .queryParam("dataType", "SR Legacy")
                         .queryParam("api_key", apiKey)
                         .build())
                 .retrieve()
@@ -47,12 +49,30 @@ public class USDAClient {
 
             for (JsonNode food : foods) {
 
+
+
                 String foodName = food.get("description").asText();
+
+                String dataType =
+                        food.path("dataType").asText();
 
                 Double calories = 0.0;
                 Double protein = 0.0;
                 Double carbs = 0.0;
                 Double fat = 0.0;
+                Double fiber = 0.0;
+                Double cholesterol = 0.0;
+                Double freeSugar = 0.0;
+                Double servingSize = 100.0;
+
+                if (food.has("servingSize")) {
+
+                    servingSize = food.path("servingSize").asDouble();
+
+                    if (servingSize <= 0) {
+                        servingSize = 100.0;
+                    }
+                }
 
                 JsonNode nutrients = food.get("foodNutrients");
 
@@ -62,7 +82,7 @@ public class USDAClient {
 
                         String nutrientName =
                                 nutrient.path("nutrientName").asText();
-
+                        System.out.println(nutrientName);
                         Double value =
                                 nutrient.path("value").asDouble();
 
@@ -85,18 +105,48 @@ public class USDAClient {
 
                             fat = value;
                         }
+
+                        if (nutrientName.equalsIgnoreCase(
+                                "Fiber, total dietary")) {
+
+                            fiber = value;
+                        }
+
+                        if (nutrientName.equalsIgnoreCase(
+                                "Cholesterol")) {
+
+                            cholesterol = value;
+                        }
+
+                        if (nutrientName.equalsIgnoreCase(
+                                "Sugars, added")) {
+
+                            freeSugar = value;
+                        }
+                        if (nutrientName.equalsIgnoreCase(
+                                "Total Sugars") && freeSugar == 0.0) {
+
+                            freeSugar = value;
+                        }
                     }
                 }
-
+                System.out.println(
+                        foodName + " -> " + dataType
+                );
                 result.add(
-                        new FoodSearchResponse(
-                                foodName,
+                        new FoodSearchResponse(foodName,
                                 calories,
                                 protein,
                                 carbs,
-                                fat
+                                fat,
+                                fiber,
+                                cholesterol,
+                                freeSugar,
+                                servingSize,
+                                dataType
                         )
                 );
+
             }
             return result;
         } catch (Exception e) {

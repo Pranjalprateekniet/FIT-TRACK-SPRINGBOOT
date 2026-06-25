@@ -40,5 +40,7 @@ public class FoodNutrition {
 
     private Double proteinCalorieRatio;
 
+    private String source;
+
 
 }
