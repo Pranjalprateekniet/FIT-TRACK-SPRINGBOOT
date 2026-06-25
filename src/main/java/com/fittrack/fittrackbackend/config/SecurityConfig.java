@@ -21,7 +21,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth->auth
-                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/auth/**","/api/nutrition/usda").permitAll()
                         .anyRequest().authenticated()
     )
                 .addFilterBefore(jwtAuthenticationFilter,UsernamePasswordAuthenticationFilter.class)
