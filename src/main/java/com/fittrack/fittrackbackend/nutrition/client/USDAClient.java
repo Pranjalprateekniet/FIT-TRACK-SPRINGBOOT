@@ -21,21 +21,51 @@ public class USDAClient {
 
     public List<FoodSearchResponse> searchFood(String query) {
 
+        List<FoodSearchResponse> foods =
+                searchFoodFromUsda(query, true);
+
+        if (foods.isEmpty()) {
+
+            System.out.println(
+                    "No raw foods found. Falling back to all USDA foods."
+            );
+
+            foods = searchFoodFromUsda(query, false);
+        }
+
+        return foods;
+    }
+    private List<FoodSearchResponse> searchFoodFromUsda(String query,boolean rawOnly) {
+
         String response= webClientBuilder.build()
+
                 .get()
-                .uri(uriBuilder -> uriBuilder
-                        .scheme("https")
-                        .host("api.nal.usda.gov")
-                        .path("/fdc/v1/foods/search")
-                        .queryParam("query", query)
-                        .queryParam("pageSize", 10)
-                        .queryParam("dataType", "Foundation")
-                        .queryParam("dataType", "SR Legacy")
-                        .queryParam("api_key", apiKey)
-                        .build())
+                .uri(uriBuilder -> {
+
+                    uriBuilder
+                            .scheme("https")
+                            .host("api.nal.usda.gov")
+                            .path("/fdc/v1/foods/search")
+                            .queryParam("query", query)
+                            .queryParam("pageSize", 10);
+
+                    if (rawOnly) {
+
+                        uriBuilder
+                                .queryParam("dataType", "Foundation")
+                                .queryParam("dataType", "SR Legacy")
+                                .queryParam("dataType", "Survey (FNDDS)");
+                    }
+
+                    uriBuilder.queryParam("api_key", apiKey);
+
+                    return uriBuilder.build();
+                })
                 .retrieve()
                 .bodyToMono(String.class)
                 .block();
+        System.out.println("RAW USDA RESPONSE:");
+        System.out.println(response);
 
         try {
 
@@ -44,6 +74,8 @@ public class USDAClient {
             JsonNode root = mapper.readTree(response);
 
             JsonNode foods = root.get("foods");
+
+            System.out.println("Foods count = " + foods.size());
 
             List<FoodSearchResponse> result = new ArrayList<>();
 
