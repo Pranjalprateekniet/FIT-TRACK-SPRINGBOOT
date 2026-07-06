@@ -1,7 +1,9 @@
 package com.fittrack.fittrackbackend.controller;
 
+import com.fittrack.fittrackbackend.dto.JwtResponse;
 import com.fittrack.fittrackbackend.dto.LoginRequest;
 import com.fittrack.fittrackbackend.dto.RegisterRequest;
+import com.fittrack.fittrackbackend.dto.TokenRefreshRequest;
 import com.fittrack.fittrackbackend.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,8 +21,13 @@ public class AuthController {
         return authService.register(request);
     }
     @PostMapping("/login")
-    public ResponseEntity<String> login(@Valid @RequestBody LoginRequest request){
-        String response= authService.login(request);
+    public ResponseEntity<JwtResponse> login(@Valid @RequestBody LoginRequest request){
+        JwtResponse response = authService.login(request);
+        return ResponseEntity.ok(response);
+    }
+    @PostMapping("/refresh")
+    public ResponseEntity<JwtResponse> refreshToken(@Valid @RequestBody TokenRefreshRequest request){
+        JwtResponse response = authService.refreshToken(request);
         return ResponseEntity.ok(response);
     }
     @GetMapping("/verify-email")

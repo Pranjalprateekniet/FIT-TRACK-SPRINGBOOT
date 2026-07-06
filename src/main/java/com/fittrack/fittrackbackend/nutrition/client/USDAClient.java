@@ -21,23 +21,22 @@ public class USDAClient {
 
     public List<FoodSearchResponse> searchFood(String query) {
 
-        List<FoodSearchResponse> foods =
-                searchFoodFromUsda(query, true);
+        List<FoodSearchResponse> foods = searchFoodFromUsda(query, true);
 
         if (foods.isEmpty()) {
 
             System.out.println(
-                    "No raw foods found. Falling back to all USDA foods."
-            );
+                    "No raw foods found. Falling back to all USDA foods.");
 
             foods = searchFoodFromUsda(query, false);
         }
 
         return foods;
     }
-    private List<FoodSearchResponse> searchFoodFromUsda(String query,boolean rawOnly) {
 
-        String response= webClientBuilder.build()
+    private List<FoodSearchResponse> searchFoodFromUsda(String query, boolean rawOnly) {
+
+        String response = webClientBuilder.build()
 
                 .get()
                 .uri(uriBuilder -> {
@@ -48,15 +47,6 @@ public class USDAClient {
                             .path("/fdc/v1/foods/search")
                             .queryParam("query", query)
                             .queryParam("pageSize", 10);
-
-                    if (rawOnly) {
-
-                        uriBuilder
-                                .queryParam("dataType", "Foundation")
-                                .queryParam("dataType", "SR Legacy")
-                                .queryParam("dataType", "Survey (FNDDS)");
-                    }
-
                     uriBuilder.queryParam("api_key", apiKey);
 
                     return uriBuilder.build();
@@ -81,12 +71,9 @@ public class USDAClient {
 
             for (JsonNode food : foods) {
 
-
-
                 String foodName = food.get("description").asText();
 
-                String dataType =
-                        food.path("dataType").asText();
+                String dataType = food.path("dataType").asText();
 
                 Double calories = 0.0;
                 Double protein = 0.0;
@@ -112,11 +99,9 @@ public class USDAClient {
 
                     for (JsonNode nutrient : nutrients) {
 
-                        String nutrientName =
-                                nutrient.path("nutrientName").asText();
+                        String nutrientName = nutrient.path("nutrientName").asText();
                         System.out.println(nutrientName);
-                        Double value =
-                                nutrient.path("value").asDouble();
+                        Double value = nutrient.path("value").asDouble();
 
                         if (nutrientName.equalsIgnoreCase("Energy")) {
                             calories = value;
@@ -163,8 +148,7 @@ public class USDAClient {
                     }
                 }
                 System.out.println(
-                        foodName + " -> " + dataType
-                );
+                        foodName + " -> " + dataType);
                 result.add(
                         new FoodSearchResponse(foodName,
                                 calories,
@@ -175,9 +159,7 @@ public class USDAClient {
                                 cholesterol,
                                 freeSugar,
                                 servingSize,
-                                dataType
-                        )
-                );
+                                dataType));
 
             }
             return result;
