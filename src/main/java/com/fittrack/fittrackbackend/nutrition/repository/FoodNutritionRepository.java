@@ -13,11 +13,20 @@ public interface FoodNutritionRepository
     Optional<FoodNutrition>
     findByFoodNameIgnoreCase(String foodName);
 
+    @Query("SELECT f FROM FoodNutrition f WHERE " +
+           "LOWER(f.foodName) = LOWER(:foodName) AND " +
+           "f.source IS NULL")
+    List<FoodNutrition> findLocalByFoodName(String foodName);
+
+
     List<FoodNutrition>
     findTop10ByFoodNameStartingWithIgnoreCase(String query);
 
     List<FoodNutrition>
     findTop10ByFoodNameContainingIgnoreCase(String query);
+
+    List<FoodNutrition>
+    findByFdcIdIsNullAndSourceStartingWith(String prefix);
 
     @Query(value = """
 SELECT *
